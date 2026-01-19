@@ -33,13 +33,14 @@ pnpm install
 
 ```bash
 cd backend
-uv run python screen_capture_tracker.py
+uv run python main.py
 ```
 
-起動後、キャプチャ対象のウィンドウを選択：
+起動前に `main.py` の `TARGET_WINDOW_NAME` を編集してキャプチャ対象を指定：
 
-- `0` で全画面
-- 番号を入力して特定のウィンドウ
+```python
+TARGET_WINDOW_NAME = "Chrome"  # ウィンドウ名（部分一致）
+```
 
 ### 2. Frontend を起動
 
