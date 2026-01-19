@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CrossingEvent {
   type: string;
@@ -15,8 +15,41 @@ type ConnectionStatus = 'connecting' | 'connected' | 'disconnected';
 export default function Home() {
   const [events, setEvents] = useState<CrossingEvent[]>([]);
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+
+  // 通知音を再生
+  const playSound = useCallback(() => {
+    if (!soundEnabled) return;
+
+    try {
+      // AudioContextを初期化（ユーザー操作後に必要）
+      if (!audioContextRef.current) {
+        audioContextRef.current = new AudioContext();
+      }
+
+      const ctx = audioContextRef.current;
+      const oscillator = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      // 心地よいビープ音
+      oscillator.frequency.value = 880; // A5音
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+
+      oscillator.start(ctx.currentTime);
+      oscillator.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+      console.error('音声再生エラー:', e);
+    }
+  }, [soundEnabled]);
 
   useEffect(() => {
     const connect = () => {
@@ -33,6 +66,7 @@ export default function Home() {
           const data: CrossingEvent = JSON.parse(event.data);
           if (data.type === 'crossing') {
             setEvents((prev) => [data, ...prev].slice(0, 50)); // 最新50件を保持
+            playSound();
           }
         } catch (e) {
           console.error('メッセージ解析エラー:', e);
@@ -61,7 +95,7 @@ export default function Home() {
         wsRef.current.close();
       }
     };
-  }, []);
+  }, [playSound]);
 
   const statusColors: Record<ConnectionStatus, string> = {
     connecting: 'bg-yellow-500',
@@ -76,7 +110,20 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="min-h-screen bg-white p-8 relative">
+      {/* Sound Toggle - Bottom Right */}
+      <button
+        onClick={() => setSoundEnabled(!soundEnabled)}
+        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-3xl shadow-lg transition-all hover:scale-110 ${
+          soundEnabled
+            ? 'bg-blue-500 text-white'
+            : 'bg-slate-200 text-slate-400'
+        }`}
+        title={soundEnabled ? '音声ON' : '音声OFF'}
+      >
+        {soundEnabled ? '🔊' : '🔇'}
+      </button>
+
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -89,7 +136,7 @@ export default function Home() {
         </div>
 
         {/* Connection Status */}
-        <div className="flex items-center justify-center gap-3 mb-8">
+        <div className="flex items-center justify-center gap-2 mb-8">
           <span
             className={`w-3 h-3 rounded-full ${statusColors[status]} animate-pulse`}
           />
