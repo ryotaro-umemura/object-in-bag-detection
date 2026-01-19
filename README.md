@@ -53,6 +53,30 @@ pnpm run dev
 
 ---
 
+## 設定フラグ
+
+### 表示設定（main.py）
+
+```python
+SHOW_TRACKER_WINDOW = True   # メイントラッカー画面を表示
+SHOW_MASK_WINDOW = False     # 赤マスク（白黒）画面を表示
+```
+
+| フラグ                | 説明                                 |
+| --------------------- | ------------------------------------ |
+| `SHOW_TRACKER_WINDOW` | YOLO検出結果のメインウィンドウを表示 |
+| `SHOW_MASK_WINDOW`    | 赤色抽出マスク（デバッグ用）を表示   |
+
+### HSV チューニング（red_tracking_utils.py）
+
+```python
+ENABLE_TUNING = False  # True: パラメータ調整モード
+```
+
+`True` にするとトラックバーが表示され、赤色検出のHSVパラメータをリアルタイムで調整可能。照明環境に合わせて調整後、最適な値をコードに反映してください。
+
+---
+
 ## 使い方
 
 1. 赤い枠（紙などで作成）を画面に配置
