@@ -25,7 +25,7 @@ export default function Home() {
     if (!soundEnabled) return;
 
     try {
-      // AudioContextを初期化（ユーザー操作後に必要）
+      // AudioContextを初期化
       if (!audioContextRef.current) {
         audioContextRef.current = new AudioContext();
       }
@@ -37,7 +37,6 @@ export default function Home() {
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
 
-      // 心地よいビープ音
       oscillator.frequency.value = 880; // A5音
       oscillator.type = 'sine';
 
