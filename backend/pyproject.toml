@@ -1,0 +1,14 @@
+[project]
+name = "yolo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "lap>=0.5.12",
+    "mss>=10.1.0",
+    "opencv-python>=4.11.0.86",
+    "pyobjc-framework-quartz>=12.1",
+    "ultralytics>=8.3.249",
+    "websockets>=15.0",
+]
